@@ -7,14 +7,14 @@ export async function handleMessage(env: Env, message: tgTypes.Message) {
 	// switch case to handle different commands
 	switch (messageText) {
 		case '/help':
-			return handleHelpCommand(env, message);
+			return await handleHelpCommand(env, message);
 		case '/change_location':
-			return handleChangeLocationCommand(env, message);
+			return await handleChangeLocationCommand(env, message);
 		default:
 			break;
 	}
 
-	tg.sendMessage(env, {
+	await tg.sendMessage(env, {
 		chat_id: message.chat.id,
 		text: `Hello, ${message.from?.first_name}! Welcome to the bot. Use /help to see available commands.`,
 	}).catch((error) => {
@@ -29,7 +29,7 @@ const helpMessage: string = `Available commands:
 /change_location - Change your location`;
 
 async function handleHelpCommand(env: Env, message: tgTypes.Message) {
-	tg.sendMessage(env, {
+	await tg.sendMessage(env, {
 		chat_id: message.chat.id,
 		text: helpMessage,
 	}).catch((error) => {
@@ -39,7 +39,7 @@ async function handleHelpCommand(env: Env, message: tgTypes.Message) {
 }
 
 async function handleChangeLocationCommand(env: Env, message: tgTypes.Message) {
-	tg.sendMessage(env, {
+	await tg.sendMessage(env, {
 		chat_id: message.chat.id,
 		text: 'Please send your new location.',
 		reply_markup: {
