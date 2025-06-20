@@ -4,6 +4,10 @@ import { Env } from '../env';
 export async function handleMessage(env: Env, message: tgTypes.Message) {
 	const messageText: string = message.text || '';
 
+	if (message.location) {
+		return await handleLocationChange(env, message);
+	}
+
 	// switch case to handle different commands
 	switch (messageText) {
 		case '/help':
@@ -12,18 +16,6 @@ export async function handleMessage(env: Env, message: tgTypes.Message) {
 			return await handleChangeLocationCommand(env, message);
 		default:
 			break;
-	}
-
-	if (message.location) {
-		console.log(`Received location: Latitude ${message.location.latitude}, Longitude ${message.location.longitude}`);
-		await tg.sendMessage(env, {
-			chat_id: message.chat.id,
-			text: `Received your location: Latitude ${message.location.latitude}, Longitude ${message.location.longitude}`,
-		}).catch((error) => {
-			console.log(`Error sending location message: ${error}`);
-			return;
-		})
-		return;
 	}
 
 	await tg.sendMessage(env, {
@@ -63,4 +55,36 @@ async function handleChangeLocationCommand(env: Env, message: tgTypes.Message) {
 		console.log(`Error sending change location message: ${error}`)
 		return
 	});
+}
+
+export type Location = {
+	latitude: number;
+	longitude: number;
+	accuracy?: number; // Optional, if available
+}
+
+// This function process user's location
+async function handleLocationChange(env: Env, message: tgTypes.Message) {
+	if (!message.location) {
+		console.log('No location provided in the message.');
+		return;
+	}
+
+	// Key to store in KV
+	const chat_id: number = message.chat.id;
+	const location: Location = {
+		latitude: message.location.latitude,
+		longitude: message.location.longitude,
+		accuracy: message.location.horizontal_accuracy, // Optional, if available
+	}
+
+	await tg.sendMessage(env, {
+		chat_id: message.chat.id,
+		text: `Received your location: Latitude ${location.latitude}, Longitude ${location.longitude}, Accuracy ${location.accuracy || 'N/A'} meters.`,
+	}).catch((error) => {
+		console.log(`Error sending location message: ${error}`);
+		return;
+	})
+
+	return;
 }
