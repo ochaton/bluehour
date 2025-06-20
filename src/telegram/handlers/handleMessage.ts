@@ -14,6 +14,18 @@ export async function handleMessage(env: Env, message: tgTypes.Message) {
 			break;
 	}
 
+	if (message.location) {
+		console.log(`Received location: Latitude ${message.location.latitude}, Longitude ${message.location.longitude}`);
+		await tg.sendMessage(env, {
+			chat_id: message.chat.id,
+			text: `Received your location: Latitude ${message.location.latitude}, Longitude ${message.location.longitude}`,
+		}).catch((error) => {
+			console.log(`Error sending location message: ${error}`);
+			return;
+		})
+		return;
+	}
+
 	await tg.sendMessage(env, {
 		chat_id: message.chat.id,
 		text: `Hello, ${message.from?.first_name}! Welcome to the bot. Use /help to see available commands.`,
