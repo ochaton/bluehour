@@ -60,7 +60,6 @@ router.post(REGISTER, async ({ ctx, env, req }) => {
 	const url: URL = new URL(req.url);
 	const port: string = url.port ? `:${url.port}` : '';
 	const webhookUrl: string = `${url.protocol}//${url.hostname}${port}${WEBHOOK}`;
-	console.log("registering webhook at:", webhookUrl);
 	return tg.setWebhook(env, {
 		url: webhookUrl,
 		secret_token: env.getSecret(),
