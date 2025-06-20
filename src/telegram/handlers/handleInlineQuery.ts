@@ -3,6 +3,7 @@ import { Env } from '../env';
 
 export async function handleInlineQuery(env: Env, inlineQuery: tgTypes.InlineQuery) {
 	// we expect here only to read location:
+	console.log(inlineQuery);
 	const location = inlineQuery.location;
 	if (location) {
 		await tg.sendMessage(env, {
