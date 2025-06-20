@@ -5,7 +5,7 @@ export async function handleInlineQuery(env: Env, inlineQuery: tgTypes.InlineQue
 	// we expect here only to read location:
 	const location = inlineQuery.location;
 	if (location) {
-		tg.sendMessage(env, {
+		await tg.sendMessage(env, {
 			chat_id: inlineQuery.from.id,
 			text: `Received your location: Latitude ${location.latitude}, Longitude ${location.longitude}`,
 		}).catch((error) => {
