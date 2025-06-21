@@ -73,7 +73,7 @@ function formatDate(date: Date, timeZone: string): string {
 		return "Invalid date";
 	}
 	const parts = new Intl.DateTimeFormat('en-CA', {
-      timeZone,
+      timeZone: timeZone,
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
@@ -85,10 +85,6 @@ function formatDate(date: Date, timeZone: string): string {
 
     const get = (type: string) => parts.find(p => p.type === type)?.value.padStart(2, '0');
     return `${get('year')}-${get('month')}-${get('day')} ${get('hour')}:${get('minute')}:${get('second')}`;
-}
-
-function formatDates(dates: Date[], timeZone: string): string[] {
-  return dates.map(date => formatDate(date, timeZone));
 }
 
 // This function process user's location
@@ -123,16 +119,7 @@ async function handleLocationChange(env: Env, message: tgTypes.Message) {
 
 	const tz: string = tzlookup(location.latitude, location.longitude);
 	const sunTimes: GetTimesResult = getTimes(new Date(), location.latitude, location.longitude);
-	// const moonTimes: GetTimesResult = getMoonTimes(new Date(), location.latitude, location.longitude);
-
-	// const kv: KVNamespace = env.getKv();
-	// kv.put(`loc:${chat_id}`, "", {
-	// 	metadata: {
-	// 		latitude: location.latitude,
-	// 		longitude: location.longitude,
-	// 		accuracy: location.accuracy || 0, // Default to 0 if not provided
-	// 	},
-	// })
+	console.log(`tz:${tz} times: ${JSON.stringify(sunTimes)}`);
 
 	const messageText: string = `Location updated successfully! Here are the details:
 Latitude: ${location.latitude}
