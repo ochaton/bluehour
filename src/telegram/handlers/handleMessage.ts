@@ -72,6 +72,7 @@ function formatDate(date: Date, timeZone: string): string {
 	if (typeof date !== 'object' || !(date instanceof Date)) {
 		return "Invalid date";
 	}
+	console.log(`Formatting date: ${date} in timezone: ${timeZone}`);
 	const parts = new Intl.DateTimeFormat('en-CA', {
       timeZone: timeZone,
       year: 'numeric',
