@@ -1,6 +1,7 @@
 import { tg } from '../lib/methods';
 import { Env } from '../env';
-import { getMoonTimes, getTimes, GetTimesResult } from "suncalc";
+import { getTimes, GetTimesResult } from "suncalc";
+import tzlookup from "@photostructure/tz-lookup";
 
 export async function handleMessage(env: Env, message: tgTypes.Message) {
 	const messageText: string = message.text || '';
@@ -67,6 +68,26 @@ export type Location = {
 	accuracy?: number; // Optional, if available
 }
 
+function formatDate(date: Date, timeZone: string): string {
+	const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hourCycle: 'h23',
+    }).formatToParts(date);
+
+    const get = (type: string) => parts.find(p => p.type === type)?.value.padStart(2, '0');
+    return `${get('year')}-${get('month')}-${get('day')} ${get('hour')}:${get('minute')}:${get('second')}`;
+}
+
+function formatDates(dates: Date[], timeZone: string): string[] {
+  return dates.map(date => formatDate(date, timeZone));
+}
+
 // This function process user's location
 async function handleLocationChange(env: Env, message: tgTypes.Message) {
 	if (!message.location) {
@@ -97,6 +118,7 @@ async function handleLocationChange(env: Env, message: tgTypes.Message) {
 	// - astronomical twilight
 	// - night
 
+	const tz: string = tzlookup(location.latitude, location.longitude);
 	const sunTimes: GetTimesResult = getTimes(new Date(), location.latitude, location.longitude);
 	// const moonTimes: GetTimesResult = getMoonTimes(new Date(), location.latitude, location.longitude);
 
@@ -114,17 +136,17 @@ Latitude: ${location.latitude}
 Longitude: ${location.longitude}
 Accuracy: ${location.accuracy || 'N/A'} meters
 
-NightEnd: ${sunTimes.nightEnd.toLocaleTimeString()}
-BlueHour: ${sunTimes.nauticalDawn.toLocaleTimeString()}
-Dawn: ${sunTimes.dawn.toLocaleTimeString()}
-Sunrise: ${sunTimes.sunrise.toLocaleTimeString()} - ${sunTimes.sunriseEnd.toLocaleTimeString()}
-Golden HourEnd: ${sunTimes.goldenHourEnd.toLocaleTimeString()}
+NightEnd: ${formatDate(sunTimes.nightEnd, tz)}
+BlueHour: ${formatDate(sunTimes.nauticalDawn, tz)}
+Dawn: ${formatDate(sunTimes.dawn, tz)}
+Sunrise: ${formatDate(sunTimes.sunrise, tz)} - ${formatDate(sunTimes.sunriseEnd, tz)}
+Golden HourEnd: ${formatDate(sunTimes.goldenHourEnd, tz)}
 
-Golden Hour: ${sunTimes.goldenHour.toLocaleTimeString()}
-Sunset: ${sunTimes.sunsetStart.toLocaleTimeString()} - ${sunTimes.sunset.toLocaleTimeString()}
-Dusk: ${sunTimes.dusk.toLocaleTimeString()}
-BlueHour: ${sunTimes.nauticalDusk.toLocaleTimeString()}
-Night: ${sunTimes.night.toLocaleTimeString()}`;
+Golden Hour: ${formatDate(sunTimes.goldenHour, tz)}
+Sunset: ${formatDate(sunTimes.sunsetStart, tz)} - ${formatDate(sunTimes.sunset, tz)}
+Dusk: ${formatDate(sunTimes.dusk, tz)}
+BlueHour: ${formatDate(sunTimes.nauticalDusk, tz)}
+Night: ${formatDate(sunTimes.night, tz)}`;
 
 	await tg.sendMessage(env, {
 		chat_id: message.chat.id,

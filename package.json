@@ -17,6 +17,7 @@
 		"wrangler": "^4.20.3"
 	},
 	"dependencies": {
+		"@photostructure/tz-lookup": "^11.2.0",
 		"@tsndr/cloudflare-worker-router": "^3.2.10",
 		"@types/suncalc": "^1.9.2",
 		"suncalc": "^1.9.0"
