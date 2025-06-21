@@ -69,7 +69,7 @@ export type Location = {
 }
 
 function formatDate(date: Date, timeZone: string): string {
-	if (typeof date !== 'object' || !(date instanceof Date)) {
+	if (typeof date !== 'object' || !(date instanceof Date) || date.toString() === 'Invalid Date') {
 		return "Invalid date";
 	}
 	console.log(`Formatting date: ${date} in timezone: ${timeZone}`);
