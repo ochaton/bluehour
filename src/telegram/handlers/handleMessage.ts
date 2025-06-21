@@ -1,6 +1,6 @@
 import { tg } from '../lib/methods';
 import { Env } from '../env';
-import { getTimes, GetTimesResult } from "suncalc";
+import { getMoonIllumination, getMoonTimes, getTimes, GetTimesResult } from "suncalc";
 import tzlookup from "@photostructure/tz-lookup";
 
 export async function handleMessage(env: Env, message: tgTypes.Message) {
@@ -106,6 +106,30 @@ async function handleLocationChange(env: Env, message: tgTypes.Message) {
 	const tz: string = tzlookup(location.latitude, location.longitude);
 	const sunTimes: GetTimesResult = getTimes(new Date(), location.latitude, location.longitude);
 
+	/*
+	0 : New Moon
+
+	Waxing Crescent
+	0.25 : First Quarter
+
+	: Waxing Gibbous
+	0.5: Full Moon
+	: Waning Gibbous
+	0.75: Last Quarter
+	1.0 : Waning Crescent
+	*/
+	const moonPhase: number = getMoonIllumination(new Date()).phase;
+	const moonEmoji: string = (() => {
+		if (moonPhase < 0.02 || moonPhase > 0.98) return '🌑'; // New Moon
+		if (moonPhase < 0.25) return '🌒'; // Waxing Crescent
+		if (moonPhase < 0.27) return '🌓'; // First Quarter
+		if (moonPhase < 0.48) return '🌔'; // Waxing Gibbous
+		if (moonPhase < 0.52) return '🌕'; // Full Moon
+		if (moonPhase < 0.75) return '🌖'; // Waning Gibbous
+		if (moonPhase < 0.77) return '🌗'; // Last Quarter
+		return '🌘'; // Waning Crescent
+	})();
+
 	const tzf = (d: Date) => {
 		return formatDate(d, tz);
 	};
@@ -134,18 +158,18 @@ async function handleLocationChange(env: Env, message: tgTypes.Message) {
 
 	const messageText: string = `Location updated successfully! Here are the details:\n` +
 		`Latitude: ${location.latitude}\n` +
-		`Longitude: ${location.longitude}\n` +
-		`Accuracy: ${location.accuracy || 'N/A'} meters\n` +
-		(times.get('nightEnd') ? `Night end: ${tzf(times.get('nightEnd')!)}\n` : '') +
-		(times.get('nauticalDawn') ? `Blue hour: ${tzf(times.get('nauticalDawn')!)}\n` : '') +
-		(times.get('dawn') ? `Dawn: ${tzf(times.get('dawn')!)}\n` : '') +
-		(times.get('sunrise') ? `Sunrise: ${tzf(times.get('sunrise')!)}-${tzf(times.get('sunriseEnd')!)}\n` : '') +
-		(times.get('goldenHourEnd') ? `Golden hour end: ${tzf(times.get('goldenHourEnd')!)}\n` : '') +
-		(times.get('goldenHour') ? `Golden hour: ${tzf(times.get('goldenHour')!)}\n` : '') +
-		(times.get('sunsetStart') ? `Sunset: ${tzf(times.get('sunsetStart')!)}-${tzf(times.get('sunset')!)}\n` : '') +
-		(times.get('dusk') ? `Dusk: ${tzf(times.get('dusk')!)}\n` : '') +
-		(times.get('nauticalDusk') ? `Blue hour: ${tzf(times.get('nauticalDusk')!)}\n` : '') +
-		(times.get('night') ? `Night: ${tzf(times.get('night')!)}\n` : '');
+		`Longitude: ${location.longitude}\n\n` +
+		`Moon: ${moonEmoji}\n` +
+		(times.get('nightEnd') ? `🌃 Night end: ${tzf(times.get('nightEnd')!)}\n` : '') +
+		(times.get('nauticalDawn') ? `🏙 Blue hour: ${tzf(times.get('nauticalDawn')!)}\n` : '') +
+		(times.get('dawn') ? `🌅 Dawn: ${tzf(times.get('dawn')!)}\n` : '') +
+		(times.get('sunrise') ? `🌅 Sunrise: ${tzf(times.get('sunrise')!)}-${tzf(times.get('sunriseEnd')!)}\n` : '') +
+		(times.get('goldenHourEnd') ? `🌇 Golden hour end: ${tzf(times.get('goldenHourEnd')!)}\n` : '') +
+		(times.get('goldenHour') ? `🌆 Golden hour: ${tzf(times.get('goldenHour')!)}\n` : '') +
+		(times.get('sunsetStart') ? `🌆 Sunset: ${tzf(times.get('sunsetStart')!)}-${tzf(times.get('sunset')!)}\n` : '') +
+		(times.get('dusk') ? `🌄 Dusk: ${tzf(times.get('dusk')!)}\n` : '') +
+		(times.get('nauticalDusk') ? `🏙 Blue hour: ${tzf(times.get('nauticalDusk')!)}\n` : '') +
+		(times.get('night') ? `🌃 Night: ${tzf(times.get('night')!)}\n` : '');
 
 	await tg.sendMessage(env, {
 		chat_id: message.chat.id,
