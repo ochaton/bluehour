@@ -127,7 +127,7 @@ async function handleLocationChange(env: Env, message: tgTypes.Message) {
 
 	// filter all Invalid dates:
 	for (let [key, value] of times) {
-		if (value instanceof Date && value.toString() === 'Invalid Date') {
+		if ((value instanceof Date) && (value.toString() === 'Invalid Date')) {
 			times.delete(key);
 		}
 	}
@@ -136,16 +136,16 @@ async function handleLocationChange(env: Env, message: tgTypes.Message) {
 		`Latitude: ${location.latitude}\n` +
 		`Longitude: ${location.longitude}\n` +
 		`Accuracy: ${location.accuracy || 'N/A'} meters\n` +
-		times.get('nightEnd') ? `Night end: ${tzf(times.get('nightEnd')!)}\n` : '' +
-		times.get('nauticalDawn') ? `Blue hour: ${tzf(times.get('nauticalDawn')!)}\n` : '' +
-		times.get('dawn') ? `Dawn: ${tzf(times.get('dawn')!)}\n` : '' +
-		times.get('sunrise') ? `Sunrise: ${tzf(times.get('sunrise')!)}-${tzf(times.get('sunriseEnd')!)}\n` : '' +
-		times.get('goldenHourEnd') ? `Golden hour end: ${tzf(times.get('goldenHourEnd')!)}\n` : '' +
-		times.get('goldenHour') ? `Golden hour: ${tzf(times.get('goldenHour')!)}\n` : '' +
-		times.get('sunsetStart') ? `Sunset: ${tzf(times.get('sunsetStart')!)}-${tzf(times.get('sunset')!)}\n` : '' +
-		times.get('dusk') ? `Dusk: ${tzf(times.get('dusk')!)}\n` : '' +
-		times.get('nauticalDusk') ? `Blue hour: ${tzf(times.get('nauticalDusk')!)}\n` : '' +
-		times.get('night') ? `Night: ${tzf(times.get('night')!)}\n` : '';
+		(times.get('nightEnd') ? `Night end: ${tzf(times.get('nightEnd')!)}\n` : '') +
+		(times.get('nauticalDawn') ? `Blue hour: ${tzf(times.get('nauticalDawn')!)}\n` : '') +
+		(times.get('dawn') ? `Dawn: ${tzf(times.get('dawn')!)}\n` : '') +
+		(times.get('sunrise') ? `Sunrise: ${tzf(times.get('sunrise')!)}-${tzf(times.get('sunriseEnd')!)}\n` : '') +
+		(times.get('goldenHourEnd') ? `Golden hour end: ${tzf(times.get('goldenHourEnd')!)}\n` : '') +
+		(times.get('goldenHour') ? `Golden hour: ${tzf(times.get('goldenHour')!)}\n` : '') +
+		(times.get('sunsetStart') ? `Sunset: ${tzf(times.get('sunsetStart')!)}-${tzf(times.get('sunset')!)}\n` : '') +
+		(times.get('dusk') ? `Dusk: ${tzf(times.get('dusk')!)}\n` : '') +
+		(times.get('nauticalDusk') ? `Blue hour: ${tzf(times.get('nauticalDusk')!)}\n` : '') +
+		(times.get('night') ? `Night: ${tzf(times.get('night')!)}\n` : '');
 
 	await tg.sendMessage(env, {
 		chat_id: message.chat.id,
