@@ -103,41 +103,49 @@ async function handleLocationChange(env: Env, message: tgTypes.Message) {
 		accuracy: message.location.horizontal_accuracy, // Optional, if available
 	}
 
-	// notification settings:
-	// - night
-	// - astronomical twilight
-	// - nautical twilight (blue hour)
-	// - sunrise
-	// - golden hour
-
-	// - day
-
-	// - golden hour
-	// - sunset
-	// - nautical twilight (blue hour)
-	// - astronomical twilight
-	// - night
-
 	const tz: string = tzlookup(location.latitude, location.longitude);
 	const sunTimes: GetTimesResult = getTimes(new Date(), location.latitude, location.longitude);
-	console.log(`tz:${tz} times: ${JSON.stringify(sunTimes)}`);
 
-	const messageText: string = `Location updated successfully! Here are the details:
-Latitude: ${location.latitude}
-Longitude: ${location.longitude}
-Accuracy: ${location.accuracy || 'N/A'} meters
+	const tzf = (d: Date) => {
+		return formatDate(d, tz);
+	};
 
-NightEnd: ${formatDate(sunTimes.nightEnd, tz)}
-BlueHour: ${formatDate(sunTimes.nauticalDawn, tz)}
-Dawn: ${formatDate(sunTimes.dawn, tz)}
-Sunrise: ${formatDate(sunTimes.sunrise, tz)} - ${formatDate(sunTimes.sunriseEnd, tz)}
-Golden HourEnd: ${formatDate(sunTimes.goldenHourEnd, tz)}
+	let times = new Map([
+		['nightEnd', sunTimes.nightEnd],
+		['nauticalDawn', sunTimes.nauticalDawn],
+		['dawn', sunTimes.dawn],
+		['sunrise', sunTimes.sunrise],
+		['sunriseEnd', sunTimes.sunriseEnd],
+		['goldenHourEnd', sunTimes.goldenHourEnd],
+		['goldenHour', sunTimes.goldenHour],
+		['sunsetStart', sunTimes.sunsetStart],
+		['sunset', sunTimes.sunset],
+		['dusk', sunTimes.dusk],
+		['nauticalDusk', sunTimes.nauticalDusk],
+		['night', sunTimes.night],
+	])
 
-Golden Hour: ${formatDate(sunTimes.goldenHour, tz)}
-Sunset: ${formatDate(sunTimes.sunsetStart, tz)} - ${formatDate(sunTimes.sunset, tz)}
-Dusk: ${formatDate(sunTimes.dusk, tz)}
-BlueHour: ${formatDate(sunTimes.nauticalDusk, tz)}
-Night: ${formatDate(sunTimes.night, tz)}`;
+	// filter all Invalid dates:
+	for (let [key, value] of times) {
+		if (value instanceof Date && value.toString() === 'Invalid Date') {
+			times.delete(key);
+		}
+	}
+
+	const messageText: string = `Location updated successfully! Here are the details:\n` +
+		`Latitude: ${location.latitude}\n` +
+		`Longitude: ${location.longitude}\n` +
+		`Accuracy: ${location.accuracy || 'N/A'} meters\n` +
+		times.get('nightEnd') ? `Night end: ${tzf(times.get('nightEnd')!)}\n` : '' +
+		times.get('nauticalDawn') ? `Blue hour: ${tzf(times.get('nauticalDawn')!)}\n` : '' +
+		times.get('dawn') ? `Dawn: ${tzf(times.get('dawn')!)}\n` : '' +
+		times.get('sunrise') ? `Sunrise: ${tzf(times.get('sunrise')!)}-${tzf(times.get('sunriseEnd')!)}\n` : '' +
+		times.get('goldenHourEnd') ? `Golden hour end: ${tzf(times.get('goldenHourEnd')!)}\n` : '' +
+		times.get('goldenHour') ? `Golden hour: ${tzf(times.get('goldenHour')!)}\n` : '' +
+		times.get('sunsetStart') ? `Sunset: ${tzf(times.get('sunsetStart')!)}-${tzf(times.get('sunset')!)}\n` : '' +
+		times.get('dusk') ? `Dusk: ${tzf(times.get('dusk')!)}\n` : '' +
+		times.get('nauticalDusk') ? `Blue hour: ${tzf(times.get('nauticalDusk')!)}\n` : '' +
+		times.get('night') ? `Night: ${tzf(times.get('night')!)}\n` : '';
 
 	await tg.sendMessage(env, {
 		chat_id: message.chat.id,
