@@ -1,7 +1,6 @@
 import { handleWebhook } from './telegram/utils/handleUpdates';
 import { Env as TgEnv } from './telegram/env';
 import { tg } from './telegram/lib/methods';
-
 import { Router } from '@tsndr/cloudflare-worker-router'
 
 // Env Types
@@ -9,20 +8,33 @@ export type Var<T = string> = T
 export type Secret<T = string> = T
 
 class Env implements TgEnv {
-	// MY_KV_NAMESPACE: KVNamespace
 	// MY_BUCKET: R2Bucket
+	BLUEHOUR_KV: KVNamespace
 	TELEGRAM_SECRET: Secret
 	TELEGRAM_API_TOKEN: Secret
 
-	constructor(secret: Secret, api_token: Secret) {
-		this.TELEGRAM_SECRET = secret
-		this.TELEGRAM_API_TOKEN = api_token;
+	constructor(env: Env) {
+		if (!env.TELEGRAM_SECRET) {
+			throw new Error('TELEGRAM_SECRET is required');
+		}
+		if (!env.TELEGRAM_API_TOKEN) {
+			throw new Error('TELEGRAM_API_TOKEN is required');
+		}
+		if (!env.BLUEHOUR_KV) {
+			throw new Error('BLUEHOUR_KV is required');
+		}
+		this.TELEGRAM_SECRET = env.TELEGRAM_SECRET
+		this.TELEGRAM_API_TOKEN = env.TELEGRAM_API_TOKEN
+		this.BLUEHOUR_KV = env.BLUEHOUR_KV
 	}
 	getSecret(): string {
 		return this.TELEGRAM_SECRET
 	}
 	getApiToken(): string {
 		return this.TELEGRAM_API_TOKEN
+	}
+	getKv(): KVNamespace {
+		return this.BLUEHOUR_KV
 	}
 }
 
@@ -86,6 +98,6 @@ router.post(UNREGISTER, async ({ env }) => {
 
 export default {
     async fetch(request: Request, env: Env, ctx: ExecutionContext) {
-        return router.handle(request, new Env(env.TELEGRAM_SECRET, env.TELEGRAM_API_TOKEN), ctx)
+        return router.handle(request, new Env(env), ctx)
     }
 } satisfies ExportedHandler<Env>;
