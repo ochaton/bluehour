@@ -69,6 +69,9 @@ export type Location = {
 }
 
 function formatDate(date: Date, timeZone: string): string {
+	if (typeof date !== 'object' || !(date instanceof Date)) {
+		return "Invalid date";
+	}
 	const parts = new Intl.DateTimeFormat('en-CA', {
       timeZone,
       year: 'numeric',
